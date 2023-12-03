@@ -22,19 +22,15 @@ module.exports = {
 					filter.forEach(w => {
 						var regEx = new RegExp(w, "ig");
 						filteredMessage = filteredMessage
-							.toString().replaceAll(regEx, "[REDACTED]");
+							.toString().replace(regEx, "[REDACTED]");
 					})
-
-					let s = userMention(message.author.id) 
-							+ " has spoken a forbidden word. Here's the amended statement:\n"
-					s = s + blockQuote(message.author.avatarURL() + " " + filteredMessage)
 
 					let embed = new EmbedBuilder().setColor("#ff0000")
 						.setTitle("Message Censored")
 						.setAuthor({name: message.author.displayName, 
 									iconURL: message!.author!.avatarURL()!})
 						.setDescription(userMention(message.author.id) + " has spoken a forbidden word.")
-						.addFields({ name: 'Amended Statement:', value: blockQuote(filteredMessage) })
+						.addFields({ name: 'Amended:', value: blockQuote(filteredMessage) })
 
 					await message.channel.send({ embeds: [embed] })
 

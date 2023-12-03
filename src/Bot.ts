@@ -1,6 +1,13 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+import fs from 'node:fs';
+import path from 'node:path';
+import { Client, Collection, GatewayIntentBits } from 'discord.js';
+
+declare module "discord.js" {
+    export interface Client {
+        commands: Collection<any, any>;
+    }
+}
+
 const dotenv = require('dotenv').config()
 const token  = dotenv.DISCORD_TOKEN
 
