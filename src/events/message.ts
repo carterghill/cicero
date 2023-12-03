@@ -1,4 +1,4 @@
-import { Events, Message } from 'discord.js';
+import { blockQuote, EmbedBuilder, Events, Message, userMention } from 'discord.js';
 import filter from '../filter.json';
 
 module.exports = {
@@ -18,13 +18,25 @@ module.exports = {
 					const fetchedMessage = await message.channel.messages.fetch(message.id);
 					await fetchedMessage.delete();
 
-					let str = message.toString()
+					let filteredMessage = message.toString()
 					filter.forEach(w => {
 						var regEx = new RegExp(w, "ig");
-						str = str.toString().replaceAll(regEx, "[REDACTED]");
+						filteredMessage = filteredMessage
+							.toString().replaceAll(regEx, "[REDACTED]");
 					})
-					
-					await message.channel.send(str)
+
+					let s = userMention(message.author.id) 
+							+ " has spoken a forbidden word. Here's the amended statement:\n"
+					s = s + blockQuote(message.author.avatarURL() + " " + filteredMessage)
+
+					let embed = new EmbedBuilder().setColor("#ff0000")
+						.setTitle("Message Censored")
+						.setAuthor({name: message.author.displayName, 
+									iconURL: message!.author!.avatarURL()!})
+						.setDescription(userMention(message.author.id) + " has spoken a forbidden word.")
+						.addFields({ name: 'Amended Statement:', value: blockQuote(filteredMessage) })
+
+					await message.channel.send({ embeds: [embed] })
 
 				} catch (error) {
 					console.error(`Failed to delete message with ID ${message.id}: ${error}`);
