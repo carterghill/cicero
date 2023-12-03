@@ -40,7 +40,30 @@ for (const file of eventFiles) {
 	if (event.once) {
 		client.once(event.name, (...args: any) => event.execute(...args));
 	} else {
-		client.on(event.name, (...args: any) => event.execute(...args));
+		client.on(event.name, async (interaction: any) => {
+            //console.log(interaction)
+            //console.log(Object.keys(interaction))
+            //console.log(interaction.type.toString())
+            //console.log(interaction.commandType.toString())
+            //console.log(interaction.commandName)
+            if (interaction.type === 2) {
+                event.execute(interaction)
+            } else if (interaction.type === 4) {
+                const command = interaction.client.commands.get(interaction.commandName);
+        
+                if (!command) {
+                    console.error(`No command matching ${interaction.commandName} was found.`);
+                    return;
+                }
+        
+                try {
+                    await command.autocomplete(interaction);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+            
+        });
 	}
 }
 
