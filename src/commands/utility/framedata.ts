@@ -1,5 +1,11 @@
-import { SlashCommandBuilder } from "discord.js";
+import { blockQuote, EmbedBuilder, SlashCommandBuilder, userMention } from "discord.js";
 import * as framedata from "../../framedata/index"
+
+let frameMap = new Map<string, any>()
+let frameVals = Object.values(framedata)
+Object.keys(framedata).forEach((key, index) => {
+    frameMap.set(key, frameVals[index])
+})
 
 let characterChoices = [
     { name: "Bowser", value: "Bowser" },
@@ -39,21 +45,45 @@ module.exports = {
             input.setName("character")
             .setDescription("The Character whose data you'd like to view")
             .setAutocomplete(true)
-            //.addChoices(...characterChoices.filter((val, index) => {
-            //    if (index < 25) return val
-            //}))
         ),
 
     async autocomplete(interaction: any) {
         const focusedValue = interaction.options.getFocused();
-        const filtered = characterChoices.filter(choice => choice.name.startsWith(focusedValue));
-        //console.log(filtered)
+        const filtered = characterChoices.filter((choice, index) => {
+            if (index < 25) return choice.name.toLowerCase().startsWith(focusedValue.toLowerCase())
+        });
         await interaction.respond(filtered);
     },
         
 	async execute(interaction: any) {
         const character = interaction.options.getString('character')
+        let moves = frameMap.get(character)
 
-        await interaction.reply('Pong!');
+        if (moves === undefined || moves === null) {
+            let characterNames = ""
+            characterChoices.forEach((val, index) => {
+                characterNames = characterNames + val.name
+                if (index < characterChoices.length-1) characterNames = characterNames + ", "
+            })
+            moves = ""
+            Object.keys(framedata.Bowser).forEach((key, index) => {
+                moves = moves + key
+                if (index < Object.keys(framedata.Bowser).length) moves = moves + ", "
+            })
+            let embed = new EmbedBuilder().setColor("#0000ff")
+				.setTitle("Melee Moveset Frames")
+				.setDescription("Provide a valid character and move to see frame data")
+				.addFields(
+                    { name: 'Characters:', value: blockQuote(characterNames) },
+                    { name: "Moves:", value: blockQuote(moves)}
+                )
+
+            await interaction.reply({ embeds: [embed] });
+            return
+        }
+
+        console.log(Object.keys(moves))
+
+        await interaction.reply(moves.toString());
 	},
 };
